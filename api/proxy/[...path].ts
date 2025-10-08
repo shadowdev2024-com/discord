@@ -1,4 +1,4 @@
-export const runtime = 'edge';  // أو '@vercel/node' إذا كنت تريد Node.js runtime
+export const runtime = 'edge';
 
 const DISCORD_BASE = 'https://discord.com/api/v10';
 
@@ -23,22 +23,27 @@ async function proxy(req, ctx) {
   if (!fake || !real) return new Response('Server misconfigured', { status: 500 });
   const origin = req.headers.get('origin');
   const auth = req.headers.get('authorization') || '';
-  if (auth !== `Bot ${fake}`) return new Response('Unauthorized', { status: 401, headers: corsHeaders(origin) });
+  if (auth !== `Bot ${fake}`) {
+    return new Response('Unauthorized', { status: 401, headers: corsHeaders(origin) });
+  }
   const url = targetUrl(req, ctx.params.path || []);
   const headers = new Headers(req.headers);
   headers.set('authorization', `Bot ${real}`);
   headers.set('x-ratelimit-precision', 'millisecond');
   headers.delete('host');
   headers.delete('content-length');
+
   const res = await fetch(url, {
     method: req.method,
     headers,
     body: ['GET','HEAD'].includes(req.method) ? undefined : req.body,
     redirect: 'manual'
   });
+
   const merged = new Headers(res.headers);
   const cors = corsHeaders(origin);
   cors.forEach((v,k) => merged.set(k, v));
+
   return new Response(res.body, {
     status: res.status,
     statusText: res.statusText,
