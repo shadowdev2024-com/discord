@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/proxy/[...path].ts": {
+      "runtime": "edge"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/proxy/(.*)",
+      "dest": "/api/proxy/[...path].ts"
+    }
+  ]
+}
