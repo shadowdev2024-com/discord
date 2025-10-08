@@ -1,8 +1,8 @@
-export const runtime = 'edge';
+export const runtime = 'edge';  // أو '@vercel/node' إذا كنت تريد Node.js runtime
 
 const DISCORD_BASE = 'https://discord.com/api/v10';
 
-function corsHeaders(origin: string | null) {
+function corsHeaders(origin) {
   const h = new Headers();
   h.set('Access-Control-Allow-Origin', origin || '*');
   h.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
@@ -11,13 +11,13 @@ function corsHeaders(origin: string | null) {
   return h;
 }
 
-function targetUrl(req: Request, segments: string[]) {
+function targetUrl(req, segments) {
   const u = new URL(req.url);
   const path = segments.join('/');
   return `${DISCORD_BASE}/${path}${u.search}`;
 }
 
-async function proxy(req: Request, ctx: { params: { path: string[] } }) {
+async function proxy(req, ctx) {
   const fake = process.env.FAKE_DISCORD_TOKEN;
   const real = process.env.DISCORD_BOT_TOKEN;
   if (!fake || !real) return new Response('Server misconfigured', { status: 500 });
@@ -30,18 +30,27 @@ async function proxy(req: Request, ctx: { params: { path: string[] } }) {
   headers.set('x-ratelimit-precision', 'millisecond');
   headers.delete('host');
   headers.delete('content-length');
-  const res = await fetch(url, { method: req.method, headers, body: ['GET','HEAD'].includes(req.method) ? undefined : req.body, redirect: 'manual' });
+  const res = await fetch(url, {
+    method: req.method,
+    headers,
+    body: ['GET','HEAD'].includes(req.method) ? undefined : req.body,
+    redirect: 'manual'
+  });
   const merged = new Headers(res.headers);
   const cors = corsHeaders(origin);
-  cors.forEach((v,k)=>merged.set(k,v));
-  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: merged });
+  cors.forEach((v,k) => merged.set(k, v));
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: merged
+  });
 }
 
-export async function OPTIONS(req: Request) {
+export async function OPTIONS(req) {
   return new Response(null, { status: 204, headers: corsHeaders(req.headers.get('origin')) });
 }
-export async function GET(req: Request, ctx: any) { return proxy(req, ctx); }
-export async function POST(req: Request, ctx: any) { return proxy(req, ctx); }
-export async function PUT(req: Request, ctx: any) { return proxy(req, ctx); }
-export async function PATCH(req: Request, ctx: any) { return proxy(req, ctx); }
-export async function DELETE(req: Request, ctx: any) { return proxy(req, ctx); }
+export async function GET(req, ctx) { return proxy(req, ctx); }
+export async function POST(req, ctx) { return proxy(req, ctx); }
+export async function PUT(req, ctx) { return proxy(req, ctx); }
+export async function PATCH(req, ctx) { return proxy(req, ctx); }
+export async function DELETE(req, ctx) { return proxy(req, ctx); }
