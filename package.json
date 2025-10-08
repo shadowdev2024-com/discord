@@ -1,9 +1,5 @@
 {
   "name": "discord-proxy",
   "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "vercel-build": "echo \"no build step\""
-  },
-  "dependencies": {}
+  "private": true
 }
