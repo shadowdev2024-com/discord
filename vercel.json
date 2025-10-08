@@ -1,7 +1,7 @@
 {
   "functions": {
     "route.ts": {
-      "runtime": "edge",
+      "runtime": "@vercel/node-edge",
       "maxDuration": 10
     }
   },
