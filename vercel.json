@@ -1,14 +1,7 @@
 {
   "functions": {
-    "route.ts": {
-      "runtime": "@vercel/node-edge",
-      "maxDuration": 10
+    "api/proxy/[...path].ts": {
+      "runtime": "edge"
     }
-  },
-  "routes": [
-    {
-      "src": "/api/proxy/(.*)",
-      "dest": "/route.ts"
-    }
-  ]
+  }
 }
